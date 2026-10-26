@@ -31,7 +31,10 @@ STATS = os.path.join(ROOT, "stats")
 PROFILE = "zichenzzhao/zichenzzhao"
 GIT_BASE = os.environ.get("STATS_GIT_BASE", "https://github.com")  # override only for tests
 
-# Repos to include (name -> area shown in README).
+# Known repos (name -> area shown in README). In live mode EVERY repo the
+# account owns is audited automatically, including ones created later; repos not
+# listed here get their GitHub description (or "Other") as the area.
+SKIP_REPOS = {"zichenzzhao"}          # the profile repo itself
 REPOS = [
     ("MAPLAB_MNE", "EEG pipeline"),
     ("Synthetic_EEG_Cocaine", "Synthetic EEG"),
@@ -183,6 +186,29 @@ def _auth_env(token):
         env.update({"GIT_CONFIG_COUNT": "1", "GIT_CONFIG_KEY_0": "http.extraHeader",
                     "GIT_CONFIG_VALUE_0": hdr})
     return env
+
+
+def list_owner_repos(owner, token):
+    """All non-fork repos the account owns (private included), via the GitHub API."""
+    import urllib.request
+    api = os.environ.get("STATS_API_BASE", "https://api.github.com")
+    found, page = [], 1
+    while True:
+        req = urllib.request.Request("%s/user/repos?affiliation=owner&per_page=100&page=%d" % (api, page),
+                                     headers={"Authorization": "Bearer " + token,
+                                              "Accept": "application/vnd.github+json"})
+        batch = json.load(urllib.request.urlopen(req, timeout=30))
+        found += [r for r in batch if r["owner"]["login"].lower() == owner.lower()]
+        if len(batch) < 100:
+            break
+        page += 1
+    known = dict(REPOS)
+    out = []
+    for r in sorted(found, key=lambda r: r["name"].lower()):
+        if r["fork"] or r["name"] in SKIP_REPOS:
+            continue
+        out.append((r["name"], known.get(r["name"]) or (r.get("description") or "Other")[:40]))
+    return out
 
 
 def remote_refs(owner, token):
@@ -525,6 +551,15 @@ def main():
     ap.add_argument("--force", action="store_true", help="recompute even if no repo moved")
     a = ap.parse_args()
     os.makedirs(STATS, exist_ok=True)
+    global REPOS
+    if a.clone and os.environ.get("STATS_TOKEN") and not os.environ.get("STATS_FIXED_REPOS"):
+        try:
+            listed = list_owner_repos(a.clone, os.environ["STATS_TOKEN"])
+            if listed:
+                REPOS = listed
+                print("Auditing %d repos owned by %s" % (len(REPOS), a.clone))
+        except Exception as e:
+            print("Repo listing failed (%s); falling back to the known list" % type(e).__name__)
     checked = now_et()
     acks = load_json(ACK_FILE, {})
     prev = load_json(os.path.join(STATS, "stats.json"), {})
