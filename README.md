@@ -46,9 +46,10 @@ The MAP Lab, directed by Dr. Muhammad A. Parvaz, studies how emotion and motivat
 
 <!-- STATS:START -->
 <p align="center">
+  <a href="./stats/AUDIT.md"><img src="https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Fzichenzzhao%2Fzichenzzhao%2Faudit-status%2Fstatus.json&style=for-the-badge&cacheSeconds=300" alt="Live audit status" /></a>
   <img src="https://img.shields.io/badge/My%20commits-339-03d8f3?style=for-the-badge" alt="My commits" />
-  <img src="https://img.shields.io/badge/Lines%20added-170%2C746-ff0055?style=for-the-badge" alt="Lines added" />
-  <img src="https://img.shields.io/badge/Code%20maintained-119%2C114%20lines-fcee0c?style=for-the-badge&labelColor=141321" alt="Code maintained" />
+  <img src="https://img.shields.io/badge/Lines%20added-170%2C892-ff0055?style=for-the-badge" alt="Lines added" />
+  <img src="https://img.shields.io/badge/Code%20maintained-119%2C218%20lines-fcee0c?style=for-the-badge&labelColor=141321" alt="Code maintained" />
   <img src="https://img.shields.io/badge/Repos-9-00ffc8?style=for-the-badge&labelColor=141321" alt="Repos" />
 </p>
 
@@ -62,12 +63,12 @@ The MAP Lab, directed by Dr. Muhammad A. Parvaz, studies how emotion and motivat
 | `maplab_web` | Lab website | 59 | +11,074 / −4,271 | 6,266 | 2026-06 → 2026-10 |
 | `Synthetic_EEG_Cocaine` | Synthetic EEG | 35 | notebooks¹ | 3,731 | 2026-04 → 2026-04 |
 | `engineerhub` | MAPLAB Hub | 19 | +13,242 / −180 | 11,894 | 2026-09 → 2026-10 |
-| `ReMAP` | Cloud app | 5 | +163 / −0 | 142 | 2026-05 → 2026-05 |
+| `ReMAP` | Cloud app | 5 | +309 / −0 | 246 | 2026-05 → 2026-05 |
 | `aible_ABCD` | ABCD / ML | 4 | +79 / −0 | 64 | 2026-05 → 2026-06 |
 | `redcap-config` | REDCap config | 3 | +464 / −0 | 398 | 2026-09 → 2026-10 |
 | `abcd-engine` | ABCD / ML | 2 | +6,100 / −0 | 5,327 | 2026-08 → 2026-09 |
 
-<sub>Computed from local git history on 2026-10-26 by <a href="./scripts/update_stats.py"><code>scripts/update_stats.py</code></a>: my non-merge commits across all branches, excluding account-mirroring housekeeping. ¹ Notebook repos show code-cell lines at HEAD only; notebook diffs are not counted. Line counts are source code I wrote: data, outputs, docs, config, lockfiles, images, notebook outputs, and code supplied by colleagues (e.g. a collaborator's source-analysis toolkit, vendored infrastructure templates) and files that declare themselves generated are excluded. Repos are private, so these are the numbers behind them.</sub>
+<sub><b>Live:</b> recomputed from the private GitHub repos within minutes of every push · data as of 2026-10-26 14:52 ET · <a href="./stats/AUDIT.md">audit ledger</a> (every commit audited, where every line went, flags) · method: <a href="./scripts/update_stats.py"><code>update_stats.py</code></a>. Counts are my non-merge commits; lines are source code I wrote, with docs, data, outputs, backups, generated files and colleagues' code excluded. ¹ Notebook repos count code-cell lines at HEAD only.</sub>
 <!-- STATS:END -->
 
 ## Systems I Build at MAP Lab 🛠️
