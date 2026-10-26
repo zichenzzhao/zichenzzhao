@@ -1,28 +1,37 @@
 #!/usr/bin/env python3
 """
-Regenerate the "By the numbers" section of the profile README from the REAL
-git history of the MAP Lab repos on this machine.
+Live, audited stats for the profile README, computed from the REAL git history
+of my MAP Lab repos.
 
-Run on the Mac that holds the work repos:
-    python3 scripts/update_stats.py
+Two modes
+  Local (default)      python3 scripts/update_stats.py
+      Reads the repos on this Mac and writes a PRIVATE audit to stats/_audit/
+      (commit subjects, largest files, authors). Changes nothing that is published.
 
-Outputs
-  stats/stats.json         aggregate counts only (published)
-  stats/languages.svg      language breakdown of tracked code (published)
-  stats/activity.svg       my commits per month (published)
-  README.md                block between <!-- STATS:START --> / <!-- STATS:END -->
-  stats/_audit/            local evidence for reviewing README claims (gitignored,
-                           never pushed: commit subjects, tree, authors)
+  Live / CI            python3 scripts/update_stats.py --publish --clone zichenzzhao
+      Run by .github/workflows/live-stats.yml every few minutes. Checks every repo's
+      refs with `git ls-remote`; if nothing moved, only the heartbeat is refreshed.
+      Otherwise it clones each private repo fresh from GitHub (token in STATS_TOKEN),
+      recomputes everything and publishes:
+        README.md            block between <!-- STATS:START --> / <!-- STATS:END -->
+        stats/stats.json     counts, audited commit SHAs, ledger, flags
+        stats/AUDIT.md       public audit ledger (where every added line went)
+        stats/*.svg          activity + language charts
+        stats/status.json    heartbeat for the live-audit badge (published on the
+                             `audit-status` branch, not committed to main)
 
-Only counts are published -- no file contents, data, paths or commit messages.
-Stdlib only; Python 3.8+.
+Public outputs contain counts and commit SHAs only -- never commit messages,
+file names, file contents or data. Stdlib only; Python 3.8+.
 """
-import json, os, re, subprocess, sys, datetime, collections, html
+import argparse, base64, collections, datetime, hashlib, html, json, os, re, shutil, subprocess, sys, tempfile
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 HOME = os.path.expanduser("~")
+STATS = os.path.join(ROOT, "stats")
+PROFILE = "zichenzzhao/zichenzzhao"
+GIT_BASE = os.environ.get("STATS_GIT_BASE", "https://github.com")  # override only for tests
 
-# Repos to include (name -> area shown in README). Paths are auto-discovered.
+# Repos to include (name -> area shown in README).
 REPOS = [
     ("MAPLAB_MNE", "EEG pipeline"),
     ("Synthetic_EEG_Cocaine", "Synthetic EEG"),
@@ -34,56 +43,113 @@ REPOS = [
     ("ReMAP", "Cloud app"),
     ("maplab_web", "Lab website"),
 ]
-# Optional manual overrides: {"MAPLAB_MNE": "/Volumes/jaxon/MAPLAB_MNE"}
-PATH_OVERRIDES_FILE = os.path.join(ROOT, "stats", "repo_paths.json")
+# Local mode: optional manual paths, e.g. {"MAPLAB_MNE": "/Volumes/jaxon/MAPLAB_MNE"}
+PATH_OVERRIDES_FILE = os.path.join(STATS, "repo_paths.json")
 SEARCH_ROOTS = [os.path.join(HOME, "Desktop"), os.path.join(HOME, "Documents"),
                 HOME, os.path.join(HOME, "Projects"), os.path.join(HOME, "code")]
-# Code I did not write (colleague-supplied or vendored). Excluded from every
-# line count and from commit line totals, even when I committed it.
+# Flags I have reviewed: {"MAPLAB_Database@abc1234": "why it is legitimate"}
+ACK_FILE = os.path.join(STATS, "audit_acknowledged.json")
+
+# Code I did not write (colleague-supplied or vendored): never counted.
 VENDORED = {
     "MAPLAB_MNE": [r"^tarik/", r"^MAPLAB_SOURCE/eegsource_toolkit/"],
     "abcd-engine": [r"Substance Use Onset Censoring"],
     "ReMAP": [r"\.tf$", r"\.tfvars$", r"\.tfstate$"],
 }
-# Housekeeping commits that sync repos between my two GitHub accounts.
-MIRROR = re.compile(r"mirror", re.I)
-# Commits whose author name/email matches this count as mine.
+MIRROR = re.compile(r"mirror", re.I)            # account-sync housekeeping commits
 ME = re.compile(r"zichen|zz3119|jaxon|jackson|zichenzha0|zichenzzhao", re.I)
+BIG_COMMIT = 10000   # counted lines in one commit -> flag for review
+BIG_FILE = 3000      # counted lines in one file at HEAD -> flag for review
 
 EXCLUDE_DIRS = re.compile(
     r"(^|/)(node_modules|\.next|dist|build|out|outputs?|data|golden|venv[^/]*|\.venv|"
     r"__pycache__|\.ipynb_checkpoints|vendor|coverage|\.git|"
-    # backups / archived copies, static asset dumps, generated public copies
     r"archived?|archives|backups?|[^/]*_backup[^/]*|assets?|public|static|wp-content|wp-includes)(/|$)", re.I)
 EXCLUDE_FILES = re.compile(
     r"(package-lock\.json|yarn\.lock|pnpm-lock\.yaml|poetry\.lock|\.min\.(js|css)$|"
     r"\.(csv|tsv|xlsx?|parquet|feather|rds|sav|edf|vhdr|vmrk|eeg|fif|set|fdt|mat|npy|npz|"
-    r"pkl|h5|png|jpe?g|gif|svg|pdf|docx?|pptx?|zip|gz|ico|woff2?|ttf|map|log)$)", re.I)
+    r"pkl|h5|png|jpe?g|gif|svg|pdf|docx?|pptx?|potx|zip|gz|ico|woff2?|ttf|map|log)$)", re.I)
+GENERATED = re.compile(r"auto-?generated|@generated|do not edit|generated by|this file is generated", re.I)
 LANG = {
     ".py": "Python", ".ipynb": "Jupyter", ".r": "R", ".rmd": "R", ".sql": "SQL",
     ".ts": "TypeScript", ".tsx": "TypeScript", ".js": "JavaScript", ".jsx": "JavaScript",
     ".mjs": "JavaScript", ".cjs": "JavaScript", ".css": "CSS", ".scss": "CSS",
-    ".html": "HTML", ".sh": "Shell", ".zsh": "Shell", ".m": "MATLAB",
+    ".html": "HTML", ".sh": "Shell", ".zsh": "Shell", ".ps1": "Shell", ".m": "MATLAB",
     ".yml": "YAML", ".yaml": "YAML", ".toml": "Config", ".ini": "Config", ".cfg": "Config",
-    ".md": "Markdown", ".prisma": "Prisma", ".dockerfile": "Docker",
+    ".md": "Markdown", ".prisma": "Prisma",
 }
-NON_CODE = {"Markdown", "YAML", "Config"}  # counted separately from code
+NON_CODE = {"Markdown", "YAML", "Config"}
+LEDGER_KEYS = [("code", "Counted as code"), ("docs_config", "Docs / config"),
+               ("notebook", "Notebooks"), ("data_or_binary", "Data / binary / lockfiles"),
+               ("excluded_dir", "Outputs / backups / assets"), ("generated", "Generated"),
+               ("vendored", "Colleague / vendored"), ("other", "Other file types")]
 COLORS = {"Python": "#3776AB", "TypeScript": "#3178C6", "JavaScript": "#F7DF1E",
           "SQL": "#03d8f3", "R": "#a78bfa", "Jupyter": "#F37626", "CSS": "#ff0055",
           "HTML": "#E34F26", "Shell": "#00ffc8", "MATLAB": "#ff8a00", "Prisma": "#c084fc",
           "Docker": "#2496ED", "Other": "#9ca3af"}
 
 
-def git(repo, *args):
+# ---------------------------------------------------------------- helpers
+def git(repo, *args, env=None):
     r = subprocess.run(["git", "-C", repo] + list(args), capture_output=True, text=True,
-                       errors="replace")
+                       errors="replace", env=env)
     return r.stdout if r.returncode == 0 else ""
 
 
-def discover():
-    overrides = {}
-    if os.path.exists(PATH_OVERRIDES_FILE):
-        overrides = json.load(open(PATH_OVERRIDES_FILE))
+def now_et():
+    try:
+        from zoneinfo import ZoneInfo
+        return datetime.datetime.now(ZoneInfo("America/New_York"))
+    except Exception:
+        return datetime.datetime.now()
+
+
+def fmt(n):
+    return format(n, ",")
+
+
+def lang_of(path):
+    base = os.path.basename(path).lower()
+    if base == "dockerfile":
+        return "Docker"
+    return LANG.get(os.path.splitext(base)[1])
+
+
+def classify(path, name, gen=()):
+    if any(re.search(v, path) for v in VENDORED.get(name, [])):
+        return "vendored"
+    if EXCLUDE_DIRS.search(path):
+        return "excluded_dir"
+    if EXCLUDE_FILES.search(path):
+        return "data_or_binary"
+    if path in gen:
+        return "generated"
+    lang = lang_of(path)
+    if lang is None:
+        return "other"
+    if lang in NON_CODE:
+        return "docs_config"
+    if lang == "Jupyter":
+        return "notebook"
+    return "code"
+
+
+def load_json(p, default):
+    try:
+        return json.load(open(p))
+    except Exception:
+        return default
+
+
+def script_hash():
+    h = hashlib.sha256(open(os.path.abspath(__file__), "rb").read())
+    h.update(json.dumps(load_json(ACK_FILE, {}), sort_keys=True).encode())
+    return h.hexdigest()[:16]
+
+
+# ---------------------------------------------------------------- sources
+def discover_local():
+    overrides = load_json(PATH_OVERRIDES_FILE, {})
     wanted = {n.lower(): n for n, _ in REPOS}
     found = collections.defaultdict(list)
     for base in SEARCH_ROOTS:
@@ -104,33 +170,49 @@ def discover():
         if name in overrides:
             paths[name] = os.path.expanduser(overrides[name]); continue
         cands = sorted(set(found.get(name, [])))
-        if not cands:
-            continue
-        # pick the clone with the most recent commit
-        cands.sort(key=lambda p: int(git(p, "log", "-1", "--format=%ct", "--all").strip() or 0))
-        paths[name] = cands[-1]
+        if cands:
+            cands.sort(key=lambda p: int(git(p, "log", "-1", "--format=%ct", "--all").strip() or 0))
+            paths[name] = cands[-1]
     return paths
 
 
-def code_lang(path, repo_name=None):
-    if EXCLUDE_DIRS.search(path) or EXCLUDE_FILES.search(path):
-        return None
-    if repo_name and any(re.search(v, path) for v in VENDORED.get(repo_name, [])):
-        return None
-    base = os.path.basename(path).lower()
-    if base == "dockerfile":
-        return "Docker"
-    return LANG.get(os.path.splitext(base)[1])
+def _auth_env(token):
+    env = dict(os.environ, GIT_LFS_SKIP_SMUDGE="1", GIT_TERMINAL_PROMPT="0")
+    if token:
+        hdr = "AUTHORIZATION: basic " + base64.b64encode(("x-access-token:" + token).encode()).decode()
+        env.update({"GIT_CONFIG_COUNT": "1", "GIT_CONFIG_KEY_0": "http.extraHeader",
+                    "GIT_CONFIG_VALUE_0": hdr})
+    return env
 
 
-GENERATED = re.compile(r"auto-?generated|@generated|do not edit|generated by|this file is generated", re.I)
+def remote_refs(owner, token):
+    """Fingerprint of every ref of every repo, without cloning."""
+    env, out = _auth_env(token), {}
+    for name, _ in REPOS:
+        r = subprocess.run(["git", "ls-remote", "%s/%s/%s.git" % (GIT_BASE, owner, name)],
+                           capture_output=True, text=True, env=env)
+        out[name] = hashlib.sha256(r.stdout.encode()).hexdigest()[:16] if r.returncode == 0 else None
+    return out
 
 
+def clone_all(owner, token, dest):
+    env, paths = _auth_env(token), {}
+    for name, _ in REPOS:
+        d = os.path.join(dest, name)
+        r = subprocess.run(["git", "clone", "--quiet", "%s/%s/%s.git" % (GIT_BASE, owner, name), d],
+                           capture_output=True, text=True, env=env)
+        if r.returncode == 0:
+            paths[name] = d
+        else:
+            print("clone failed: %s (exit %d)" % (name, r.returncode))   # stderr not printed
+    return paths
+
+
+# ---------------------------------------------------------------- analysis
 def generated_paths(repo, name):
-    """Tracked code files that declare themselves generated (header) -- not hand-written."""
     out = set()
     for f in git(repo, "ls-files").splitlines():
-        if not code_lang(f, name):
+        if classify(f, name) not in ("code", "docs_config"):
             continue
         try:
             with open(os.path.join(repo, f), errors="ignore") as fh:
@@ -142,122 +224,138 @@ def generated_paths(repo, name):
     return out
 
 
-def analyze(name, repo):
+def count_lines(p, lang):
+    if lang == "Jupyter":
+        nb = json.load(open(p, errors="ignore"))
+        n = 0
+        for c in nb.get("cells", []):
+            if c.get("cell_type") != "code":
+                continue
+            src = c.get("source", [])
+            src = src if isinstance(src, list) else str(src).splitlines()
+            n += sum(1 for l in src if str(l).strip())
+        return n
+    if os.path.getsize(p) > 1_500_000:
+        return 0
+    with open(p, errors="ignore") as fh:
+        return sum(1 for l in fh if l.strip())
+
+
+def analyze(name, repo, acks):
     gen = generated_paths(repo, name)
-    info = {"repo": name}
-    log = git(repo, "log", "--all", "--no-merges", "--date=short", "--numstat",
-              "--format=@@%H\t%ad\t%an\t%ae")
     subjects = {}
     for l in git(repo, "log", "--all", "--no-merges", "--format=%H\t%s").splitlines():
         if "\t" in l:
-            h, sub = l.split("\t", 1); subjects[h] = sub
-    commits, authors = {}, collections.Counter()
-    cur = None
+            h, s = l.split("\t", 1); subjects[h] = s
+    log = git(repo, "log", "--all", "--no-merges", "--date=short", "--numstat",
+              "--format=@@%H\t%ad\t%an\t%ae")
+    commits, authors, cur = {}, collections.Counter(), None
     for line in log.splitlines():
         if line.startswith("@@"):
             h, d, an, ae = line[2:].split("\t", 3)
-            cur = {"date": d, "mine": bool(ME.search(an) or ME.search(ae)), "add": 0, "del": 0,
-                   "files": [], "subject": subjects.get(h, "")}
-            commits.setdefault(h, cur); cur = commits[h]
+            cur = commits.setdefault(h, {"sha": h, "date": d, "mine": bool(ME.search(an) or ME.search(ae)),
+                                         "add": 0, "del": 0, "files": [], "subject": subjects.get(h, ""),
+                                         "ledger": collections.Counter(), "binary": 0})
             authors["%s <%s>" % (an, ae)] += 1
         elif line.strip() and cur is not None:
             parts = line.split("\t")
             if len(parts) != 3:
                 continue
             cur["files"].append(parts[2])
-            lang = code_lang(parts[2], name)
-            if parts[0] != "-" and lang and lang not in NON_CODE and lang != "Jupyter" \
-                    and parts[2] not in gen:
+            if parts[0] == "-":
+                cur["binary"] += 1; continue
+            cat = classify(parts[2], name, gen)
+            cur["ledger"][cat] += int(parts[0])
+            if cat == "code":
                 cur["add"] += int(parts[0]); cur["del"] += int(parts[1])
-    skipped = [h for h, c in commits.items() if MIRROR.search(c["subject"]) and
-               all(f.startswith(".github/") for f in c["files"])]
-    for h in skipped:
+    mirror = [h for h, c in commits.items() if MIRROR.search(c["subject"]) and
+              all(f.startswith(".github/") for f in c["files"])]
+    for h in mirror:
         del commits[h]
-    info["mirror_commits_skipped"] = len(skipped)
-    info["_biggest_commits"] = sorted(([c["add"], c["del"], c["date"], c["subject"][:80], len(c["files"])]
-                                       for c in commits.values() if c["mine"]), reverse=True)[:12]
-    info["generated_excluded"] = sorted(gen)
     mine = [c for c in commits.values() if c["mine"]]
+    others = [c for c in commits.values() if not c["mine"]]
+    ledger = collections.Counter()
+    for c in mine:
+        ledger.update(c["ledger"])
     dates = sorted(c["date"] for c in mine)
-    info.update({
-        "commits_total": len(commits), "commits_mine": len(mine),
-        "lines_added_mine": sum(c["add"] for c in mine),
-        "lines_deleted_mine": sum(c["del"] for c in mine),
-        "active_days_mine": len(set(dates)),
-        "first_commit": dates[0] if dates else None,
-        "last_commit": dates[-1] if dates else None,
-        "monthly_mine": dict(collections.Counter(d[:7] for d in dates)),
-    })
-    # current code at HEAD
-    langs = collections.Counter(); files = 0; tests = 0; migrations = 0; sizes = []
+    head = git(repo, "rev-parse", "HEAD").strip()
+
+    # code at HEAD
+    langs, files, tests, sizes = collections.Counter(), 0, 0, []
     notebook_only = True
     for f in git(repo, "ls-files").splitlines():
-        lang = code_lang(f, name)
-        if not lang or f in gen:
+        cat = classify(f, name, gen)
+        if cat not in ("code", "notebook", "docs_config"):
             continue
-        p = os.path.join(repo, f)
+        lang = lang_of(f)
         try:
-            if lang == "Jupyter":
-                nb = json.load(open(p, errors="ignore"))
-                n = sum(1 for c in nb.get("cells", []) if c.get("cell_type") == "code"
-                        for l in (c.get("source") if isinstance(c.get("source"), list)
-                                  else str(c.get("source", "")).splitlines()) if str(l).strip())
-            else:
-                if os.path.getsize(p) > 1_500_000:
-                    continue
-                with open(p, errors="ignore") as fh:
-                    n = sum(1 for l in fh if l.strip())
+            n = count_lines(os.path.join(repo, f), lang)
         except (OSError, ValueError):
             continue
         langs[lang] += n
-        if lang not in NON_CODE:
-            files += 1
-            sizes.append((n, f))
-            if lang != "Jupyter":
-                notebook_only = False
-        b = os.path.basename(f).lower()
-        if re.match(r"(test_.*\.py|.*_test\.py|.*\.(test|spec)\.[jt]sx?)$", b):
+        if cat != "docs_config":
+            files += 1; sizes.append((n, f))
+            notebook_only = notebook_only and cat == "notebook"
+        if re.match(r"(test_.*\.py|.*_test\.py|.*\.(test|spec)\.[jt]sx?)$", os.path.basename(f).lower()):
             tests += 1
-        if lang == "SQL" and re.search(r"migrations?/", f, re.I):
-            migrations += 1
-    info.update({
+
+    flags = []
+    for c in sorted(mine, key=lambda c: -c["add"]):
+        if c["add"] > BIG_COMMIT:
+            key = "%s@%s" % (name, c["sha"][:7])
+            flags.append({"key": key, "kind": "large_commit", "date": c["date"], "lines": c["add"],
+                          "ack": acks.get(key)})
+    big_files = [(n, f) for n, f in sizes if n > BIG_FILE]
+    if big_files:
+        key = "%s@files>%d" % (name, BIG_FILE)
+        flags.append({"key": key, "kind": "large_files", "count": len(big_files),
+                      "lines": sum(n for n, _ in big_files), "ack": acks.get(key)})
+
+    info = {
+        "repo": name, "head": head[:12], "head_date": git(repo, "log", "-1", "--format=%cs", "HEAD").strip(),
+        "commits_all": len(commits) + len(mirror),
+        "commits_mine": len(mine), "commits_others": len(others), "commits_mirror": len(mirror),
+        "commits_merge": int((git(repo, "rev-list", "--all", "--merges", "--count").strip() or 0)),
+        "lines_added_mine": sum(c["add"] for c in mine),
+        "lines_deleted_mine": sum(c["del"] for c in mine),
+        "ledger_added": {k: ledger.get(k, 0) for k, _ in LEDGER_KEYS},
+        "ledger_raw_added": sum(ledger.values()),
+        "binary_file_changes": sum(c["binary"] for c in mine),
+        "active_days": len(set(dates)),
+        "first_commit": dates[0] if dates else None, "last_commit": dates[-1] if dates else None,
+        "monthly_mine": dict(collections.Counter(d[:7] for d in dates)),
         "code_lines_head": sum(v for k, v in langs.items() if k not in NON_CODE),
-        "doc_config_lines_head": sum(v for k, v in langs.items() if k in NON_CODE),
-        "code_files_head": files, "test_files": tests, "sql_migrations": migrations,
-        "languages": dict(langs.most_common()),
-        "vendored_excluded": VENDORED.get(name, []),
+        "code_files_head": files, "test_files": tests,
         "notebook_only": notebook_only and files > 0,
-        "_largest_files": [[n, f] for n, f in sorted(sizes, reverse=True)[:25]],
+        "languages": dict(langs.most_common()),
+        "generated_files_excluded": len(gen),
         "tags": [t for t in git(repo, "tag", "--sort=creatordate").split() if t][-15:],
-        "branches": len([b for b in git(repo, "branch", "-a").splitlines() if "->" not in b]),
-    })
-    return info, authors, commits
+        "flags": flags,
+    }
+    # reconciliation: counted code lines must equal the ledger's code bucket
+    info["reconciled"] = (info["lines_added_mine"] == info["ledger_added"]["code"] and
+                          info["ledger_raw_added"] == sum(info["ledger_added"].values()))
+    private = {"authors": authors, "sizes": sorted(sizes, reverse=True)[:25], "big_files": big_files,
+               "biggest": sorted(mine, key=lambda c: -c["add"])[:12], "gen": sorted(gen)}
+    return info, private
 
 
-def write_audit(name, repo, info, authors):
-    d = os.path.join(ROOT, "stats", "_audit"); os.makedirs(d, exist_ok=True)
+# ---------------------------------------------------------------- outputs
+def write_private_audit(name, repo, info, priv):
+    d = os.path.join(STATS, "_audit"); os.makedirs(d, exist_ok=True)
     with open(os.path.join(d, name + ".md"), "w") as f:
-        f.write("# %s\n\npath: %s\n\n```json\n%s\n```\n\n" % (name, repo, json.dumps(info, indent=2)))
-        f.write("## largest counted files at HEAD (lines, path)\n```\n" + "".join("%7d %s\n" % (n, p) for n, p in info.get("_largest_files", [])) + "```\n\n")
-        f.write("## biggest commits of mine (added, deleted, date, subject, files)\n```\n" + "".join("%7d %7d %s %s (%d files)\n" % tuple(c[:2] + [c[2], c[3], c[4]]) for c in info.get("_biggest_commits", [])) + "```\n\n")
-        f.write("## authors (all branches)\n" + "".join("- %d  %s\n" % (n, a) for a, n in authors.most_common()))
-        f.write("\n## last 400 commit subjects (all authors)\n```\n")
-        f.write(git(repo, "log", "--all", "--no-merges", "-n", "400", "--date=short",
-                    "--format=%ad %an | %s").strip()[:40000])
-        f.write("\n```\n\n## top-level tree\n```\n" + git(repo, "ls-tree", "--name-only", "HEAD") + "```\n")
-        f.write("\n## tracked dirs (depth 2, file counts)\n```\n")
-        c = collections.Counter("/".join(p.split("/")[:2]) for p in git(repo, "ls-files").splitlines() if "/" in p)
-        f.write("".join("%5d %s\n" % (n, p) for p, n in c.most_common(80)) + "```\n")
-        f.write("\n## README head\n```\n")
-        for cand in ("README.md", "readme.md", "README.MD"):
-            p = os.path.join(repo, cand)
-            if os.path.exists(p):
-                f.write(open(p, errors="ignore").read()[:6000]); break
-        f.write("\n```\n")
+        f.write("# %s  (PRIVATE - gitignored)\n\npath: %s\n\n```json\n%s\n```\n\n" % (name, repo, json.dumps(info, indent=2)))
+        f.write("## largest counted files at HEAD\n```\n" + "".join("%7d %s\n" % x for x in priv["sizes"]) + "```\n\n")
+        f.write("## files over %d lines (flagged)\n```\n" % BIG_FILE + "".join("%7d %s\n" % x for x in priv["big_files"]) + "```\n\n")
+        f.write("## biggest commits of mine (counted added, deleted, date, sha, subject)\n```\n" + "".join(
+            "%7d %7d %s %s %s\n" % (c["add"], c["del"], c["date"], c["sha"][:7], c["subject"][:90]) for c in priv["biggest"]) + "```\n\n")
+        f.write("## generated files excluded\n```\n" + "\n".join(priv["gen"]) + "\n```\n\n")
+        f.write("## authors\n" + "".join("- %d  %s\n" % (n, a) for a, n in priv["authors"].most_common()))
+        f.write("\n## recent commit subjects\n```\n" + git(repo, "log", "--all", "--no-merges", "-n", "200",
+                                                           "--date=short", "--format=%ad %h %an | %s") + "```\n")
 
 
 def bar_svg(title, items, total_label, width=880):
-    """Horizontal stacked bar + legend, neon card."""
     total = sum(v for _, v in items) or 1
     h = 112 + 22 * ((len(items) + 2) // 3)
     out = ['<svg xmlns="http://www.w3.org/2000/svg" width="%d" height="%d" viewBox="0 0 %d %d" font-family="Segoe UI,Helvetica,Arial,sans-serif">' % (width, h, width, h),
@@ -272,7 +370,7 @@ def bar_svg(title, items, total_label, width=880):
     for i, (k, v) in enumerate(items):
         cx, cy = 28 + (i % 3) * ((width - 56) / 3), 112 + 22 * (i // 3)
         out.append('<circle cx="%.1f" cy="%d" r="5" fill="%s"/>' % (cx + 5, cy - 4, COLORS.get(k, COLORS["Other"])))
-        out.append('<text x="%.1f" y="%d" fill="#e5e7eb" font-size="14">%s <tspan fill="#9ca3af">%.1f%% · %s lines</tspan></text>' % (cx + 16, cy, html.escape(k), 100.0 * v / total, format(v, ",")))
+        out.append('<text x="%.1f" y="%d" fill="#e5e7eb" font-size="14">%s <tspan fill="#9ca3af">%.1f%% · %s lines</tspan></text>' % (cx + 16, cy, html.escape(k), 100.0 * v / total, fmt(v)))
     out.append("</svg>")
     return "\n".join(out)
 
@@ -281,121 +379,234 @@ def activity_svg(monthly, width=880, h=220):
     if not monthly:
         return None
     first = datetime.date(int(min(monthly)[:4]), int(min(monthly)[5:]), 1)
-    today = datetime.date.today(); months = []
+    today = now_et().date(); months = []
     y, m = first.year, first.month
     while (y, m) <= (today.year, today.month):
         months.append("%04d-%02d" % (y, m)); m += 1
-        if m > 12: y, m = y + 1, 1
+        if m > 12:
+            y, m = y + 1, 1
     mx = max(monthly.values()) or 1
     left, right, top, bottom = 48, 28, 64, 40
     pw = (width - left - right) / len(months); ph = h - top - bottom
     out = ['<svg xmlns="http://www.w3.org/2000/svg" width="%d" height="%d" viewBox="0 0 %d %d" font-family="Segoe UI,Helvetica,Arial,sans-serif">' % (width, h, width, h),
+           '<defs><linearGradient id="g" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#03d8f3"/><stop offset="1" stop-color="#ff0055"/></linearGradient></defs>',
            '<rect x="0.5" y="0.5" width="%d" height="%d" rx="12" fill="#141321" stroke="#03d8f3" stroke-opacity="0.35"/>' % (width - 1, h - 1),
            '<text x="28" y="40" fill="#f9fafb" font-size="20" font-weight="600">My commits per month · MAP Lab repos</text>',
-           '<text x="%d" y="40" fill="#9ca3af" font-size="14" text-anchor="end">%s commits</text>' % (width - 28, format(sum(monthly.values()), ","))]
+           '<text x="%d" y="40" fill="#9ca3af" font-size="14" text-anchor="end">%s commits</text>' % (width - 28, fmt(sum(monthly.values())))]
     for i, mo in enumerate(months):
-        v = monthly.get(mo, 0); bh = ph * v / mx
-        x = left + i * pw
+        v = monthly.get(mo, 0); bh = ph * v / mx; x = left + i * pw
         out.append('<rect x="%.1f" y="%.1f" width="%.1f" height="%.1f" rx="3" fill="url(#g)"><title>%s: %d</title></rect>' % (x + pw * 0.15, top + ph - bh, pw * 0.7, max(bh, 1 if v else 0), mo, v))
         if v:
             out.append('<text x="%.1f" y="%.1f" fill="#e5e7eb" font-size="11" text-anchor="middle">%d</text>' % (x + pw / 2, top + ph - bh - 5, v))
         if len(months) <= 18 or i % 2 == 0:
             label = datetime.date(int(mo[:4]), int(mo[5:]), 1).strftime("%b %y")
             out.append('<text x="%.1f" y="%d" fill="#9ca3af" font-size="11" text-anchor="middle">%s</text>' % (x + pw / 2, h - 16, label))
-    out.insert(1, '<defs><linearGradient id="g" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#03d8f3"/><stop offset="1" stop-color="#ff0055"/></linearGradient></defs>')
     out.append("</svg>")
     return "\n".join(out)
 
 
-def fmt(n):
-    return format(n, ",")
-
-
-def main():
-    paths = discover()
-    missing = [n for n, _ in REPOS if n not in paths]
-    area = dict(REPOS)
-    results, monthly, langs = [], collections.Counter(), collections.Counter()
-    for name, _ in REPOS:
-        if name not in paths:
-            continue
-        info, authors, _ = analyze(name, paths[name])
-        info["area"] = area[name]
-        write_audit(name, paths[name], info, authors)
-        results.append(info)
-        monthly.update(info["monthly_mine"])
-        langs.update({k: v for k, v in info["languages"].items() if k not in NON_CODE})
-        print("%-22s %-45s mine=%d/%d commits" % (name, paths[name], info["commits_mine"], info["commits_total"]))
+def audit_status(results, missing):
     if missing:
-        print("\nNOT FOUND (add paths to stats/repo_paths.json):", ", ".join(missing))
-    today = datetime.date.today().isoformat()
-    tot = {
-        "repos": len(results),
-        "commits_mine": sum(r["commits_mine"] for r in results),
-        "lines_added_mine": sum(r["lines_added_mine"] for r in results),
-        "lines_deleted_mine": sum(r["lines_deleted_mine"] for r in results),
-        "code_lines_head": sum(r["code_lines_head"] for r in results),
-        "first_commit": min([r["first_commit"] for r in results if r["first_commit"]] or [None]),
-        "last_commit": max([r["last_commit"] for r in results if r["last_commit"]] or [None]),
-    }
-    public = {"generated": today, "totals": tot,
-              "repos": [{k: r[k] for k in ("repo", "area", "commits_mine", "lines_added_mine",
-                                           "lines_deleted_mine", "code_lines_head", "code_files_head",
-                                           "test_files", "sql_migrations", "first_commit", "last_commit",
-                                           "languages", "tags")} for r in results],
-              "monthly_commits_mine": dict(sorted(monthly.items())),
-              "missing": missing}
-    os.makedirs(os.path.join(ROOT, "stats"), exist_ok=True)
-    json.dump(public, open(os.path.join(ROOT, "stats", "stats.json"), "w"), indent=2)
+        return "FAIL"
+    if any(not r["reconciled"] for r in results):
+        return "FAIL"
+    if any(not f["ack"] for r in results for f in r["flags"]):
+        return "WARN"
+    return "PASS"
 
-    top = langs.most_common(7)
-    rest = sum(langs.values()) - sum(v for _, v in top)
-    if rest > 0:
-        top.append(("Other", rest))
-    open(os.path.join(ROOT, "stats", "languages.svg"), "w").write(
-        bar_svg("Code by language · MAP Lab repos (current HEAD)", top, "%s lines of code" % fmt(sum(langs.values()))))
-    a = activity_svg(dict(monthly))
-    if a:
-        open(os.path.join(ROOT, "stats", "activity.svg"), "w").write(a)
 
+def run_link():
+    if os.environ.get("GITHUB_RUN_ID"):
+        return "%s/%s/actions/runs/%s" % (os.environ.get("GITHUB_SERVER_URL", "https://github.com"),
+                                          os.environ.get("GITHUB_REPOSITORY", PROFILE), os.environ["GITHUB_RUN_ID"])
+    return None
+
+
+def write_status(status, checked, data_as_of, source):
+    color = {"PASS": "brightgreen", "WARN": "yellow", "FAIL": "red"}.get(status, "lightgrey")
+    json.dump({"schemaVersion": 1, "label": "live audit",
+               "message": "%s · checked %s ET" % (status, checked.strftime("%b %-d %H:%M")),
+               "color": color, "status": status, "checked": checked.isoformat(timespec="seconds"),
+               "data_as_of": data_as_of, "source": source, "run": run_link()},
+              open(os.path.join(STATS, "status.json"), "w"), indent=2)
+
+
+def write_audit_md(results, missing, status, as_of, fp, source):
+    L = ["# Live audit ledger", "",
+         "**Status: %s** · data as of %s ET%s" % (status, as_of.strftime("%Y-%m-%d %H:%M"),
+                                                  " · [run log](%s)" % run_link() if run_link() else ""), "",
+         "Source: %s. Every number on the profile is recomputed from these exact commits by "
+         "[`scripts/update_stats.py`](../scripts/update_stats.py). Repos are private; this ledger publishes "
+         "counts and commit SHAs only." % source, "",
+         "## Commits audited", "",
+         "| Repo | Commit audited | Committed | All commits | Mine (counted) | Others' (excluded) | Mirror sync (excluded) | Merges (excluded) |",
+         "|---|---|---|--:|--:|--:|--:|--:|"]
+    for r in results:
+        L.append("| `%s` | `%s` | %s | %s | %s | %s | %s | %s |" % (
+            r["repo"], r["head"][:7], r["head_date"], fmt(r["commits_all"]), fmt(r["commits_mine"]),
+            fmt(r["commits_others"]), fmt(r["commits_mirror"]), fmt(r["commits_merge"])))
+    for m in missing:
+        L.append("| `%s` | **unreachable** | | | | | | |" % m)
+    L += ["", "## Where every line I added went", "",
+          "Only the first column is shown on the profile. A row reconciles when the buckets add up to the raw total.", "",
+          "| Repo | Raw lines added | " + " | ".join(t for _, t in LEDGER_KEYS) + " | Reconciles |",
+          "|---|--:|" + "--:|" * len(LEDGER_KEYS) + ":-:|"]
+    for r in results:
+        L.append("| `%s` | %s | %s | %s |" % (r["repo"], fmt(r["ledger_raw_added"]),
+                 " | ".join(fmt(r["ledger_added"][k]) for k, _ in LEDGER_KEYS), "✅" if r["reconciled"] else "❌"))
+    L += ["", "## Flags", ""]
+    flags = [(r["repo"], f) for r in results for f in r["flags"]]
+    if not flags:
+        L.append("None. No commit adds more than %s counted lines and no file exceeds %s lines." % (fmt(BIG_COMMIT), fmt(BIG_FILE)))
+    for repo, f in flags:
+        what = ("commit `%s` (%s) adds %s counted lines" % (f["key"].split("@")[1], f["date"], fmt(f["lines"]))
+                if f["kind"] == "large_commit" else
+                "%d file(s) over %s lines (%s lines total)" % (f["count"], fmt(BIG_FILE), fmt(f["lines"])))
+        L.append("- %s `%s`: %s. %s" % ("✅ reviewed" if f["ack"] else "⚠️ needs review", repo, what,
+                                        ("Reviewed: " + f["ack"]) if f["ack"] else
+                                        "Add `\"%s\": \"reason\"` to `stats/audit_acknowledged.json` once checked." % f["key"]))
+    L += ["", "## Rules", "",
+          "- **Mine** = non-merge commits whose author matches my names or emails, on every branch. Commits that only touch "
+          "the account-mirroring workflow are housekeeping and excluded.",
+          "- **Counted as code** = lines added in source files. Excluded: docs and config, notebook diffs "
+          "(notebooks count code-cell lines at HEAD instead), data, outputs, binaries, lockfiles, backups and archived copies, "
+          "static asset dumps, files that declare themselves generated, and code supplied by colleagues or vendored.",
+          "- **Flags**: any single commit over %s counted lines or any file over %s lines is flagged until reviewed." % (fmt(BIG_COMMIT), fmt(BIG_FILE)),
+          "- **Status**: PASS = everything reconciles and every flag is reviewed. WARN = unreviewed flags. FAIL = a repo was unreachable or a ledger does not reconcile.",
+          "", "Fingerprint: `%s`" % fp, ""]
+    open(os.path.join(STATS, "AUDIT.md"), "w").write("\n".join(L))
+
+
+def write_readme(results, tot, status, as_of):
     rows = ["| Repo | Area | My commits | Lines I added / removed | Code at HEAD | Active |",
             "|---|---|--:|--:|--:|---|"]
     for r in sorted(results, key=lambda r: -r["commits_mine"]):
         span = "%s → %s" % (r["first_commit"][:7], r["last_commit"][:7]) if r["first_commit"] else "–"
-        churn = ("notebooks¹" if r.get("notebook_only") else
+        churn = ("notebooks¹" if r["notebook_only"] else
                  "+%s / −%s" % (fmt(r["lines_added_mine"]), fmt(r["lines_deleted_mine"])))
-        rows.append("| `%s` | %s | %s | %s | %s | %s |" % (
-            r["repo"], r["area"], fmt(r["commits_mine"]), churn, fmt(r["code_lines_head"]), span))
+        rows.append("| `%s` | %s | %s | %s | %s | %s |" % (r["repo"], dict(REPOS)[r["repo"]],
+                    fmt(r["commits_mine"]), churn, fmt(r["code_lines_head"]), span))
+    badge = ("https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2F" +
+             PROFILE.replace("/", "%2F") + "%2Faudit-status%2Fstatus.json&style=for-the-badge&cacheSeconds=300")
+    enc = lambda n: fmt(n).replace(",", "%2C")
     block = "\n".join([
         "<!-- STATS:START -->",
         "<p align=\"center\">",
-        "  <img src=\"https://img.shields.io/badge/My%%20commits-%s-03d8f3?style=for-the-badge\" alt=\"My commits\" />" % fmt(tot["commits_mine"]).replace(",", "%2C"),
-        "  <img src=\"https://img.shields.io/badge/Lines%%20added-%s-ff0055?style=for-the-badge\" alt=\"Lines added\" />" % fmt(tot["lines_added_mine"]).replace(",", "%2C"),
-        "  <img src=\"https://img.shields.io/badge/Code%%20maintained-%s%%20lines-fcee0c?style=for-the-badge&labelColor=141321\" alt=\"Code maintained\" />" % fmt(tot["code_lines_head"]).replace(",", "%2C"),
+        "  <a href=\"./stats/AUDIT.md\"><img src=\"%s\" alt=\"Live audit status\" /></a>" % badge,
+        "  <img src=\"https://img.shields.io/badge/My%%20commits-%s-03d8f3?style=for-the-badge\" alt=\"My commits\" />" % enc(tot["commits_mine"]),
+        "  <img src=\"https://img.shields.io/badge/Lines%%20added-%s-ff0055?style=for-the-badge\" alt=\"Lines added\" />" % enc(tot["lines_added_mine"]),
+        "  <img src=\"https://img.shields.io/badge/Code%%20maintained-%s%%20lines-fcee0c?style=for-the-badge&labelColor=141321\" alt=\"Code maintained\" />" % enc(tot["code_lines_head"]),
         "  <img src=\"https://img.shields.io/badge/Repos-%d-00ffc8?style=for-the-badge&labelColor=141321\" alt=\"Repos\" />" % tot["repos"],
-        "</p>",
-        "",
+        "</p>", "",
         "<p align=\"center\"><img src=\"./stats/activity.svg\" width=\"100%\" alt=\"My commits per month\" /></p>",
-        "<p align=\"center\"><img src=\"./stats/languages.svg\" width=\"100%\" alt=\"Code by language\" /></p>",
-        "",
-    ] + rows + [
-        "",
-        "<sub>Computed from local git history on %s by <a href=\"./scripts/update_stats.py\"><code>scripts/update_stats.py</code></a>: "
-        "my non-merge commits across all branches, excluding account-mirroring housekeeping. "
-        "¹ Notebook repos show code-cell lines at HEAD only; notebook diffs are not counted. "
-        "Line counts are source code I wrote: data, outputs, docs, config, lockfiles, images, notebook outputs, and code supplied by colleagues "
-        "(e.g. a collaborator's source-analysis toolkit, vendored infrastructure templates) and files that declare themselves generated are excluded. Repos are private, so these are the numbers behind them.</sub>" % today,
+        "<p align=\"center\"><img src=\"./stats/languages.svg\" width=\"100%\" alt=\"Code by language\" /></p>", "",
+    ] + rows + ["",
+        "<sub><b>Live:</b> recomputed from the private GitHub repos within minutes of every push · data as of %s ET · "
+        "<a href=\"./stats/AUDIT.md\">audit ledger</a> (every commit audited, where every line went, flags) · "
+        "method: <a href=\"./scripts/update_stats.py\"><code>update_stats.py</code></a>. "
+        "Counts are my non-merge commits; lines are source code I wrote, with docs, data, outputs, backups, "
+        "generated files and colleagues' code excluded. ¹ Notebook repos count code-cell lines at HEAD only.</sub>"
+        % as_of.strftime("%Y-%m-%d %H:%M"),
         "<!-- STATS:END -->"])
     rp = os.path.join(ROOT, "README.md"); s = open(rp).read()
     if "<!-- STATS:START -->" in s:
         s = re.sub(r"<!-- STATS:START -->.*?<!-- STATS:END -->", lambda _: block, s, flags=re.S)
     else:
-        s = s.replace("## Activity", "## By the Numbers 📈\n\n" + block + "\n\n## Activity", 1)
-    s = re.sub(r"<sub>Last updated: [^<]*</sub>", "<sub>Last updated: %s</sub>" % datetime.date.today().strftime("%B %Y"), s)
+        s = s.replace("## Systems I Build", "## By the Numbers 📈\n\n" + block + "\n\n## Systems I Build", 1)
+    s = re.sub(r"<sub>Last updated: [^<]*</sub>", "<sub>Last updated: %s</sub>" % as_of.strftime("%B %Y"), s)
     open(rp, "w").write(s)
-    print("\nTotals:", json.dumps(tot))
-    print("Wrote stats/stats.json, stats/*.svg, README.md; audit in stats/_audit/ (not pushed)")
+
+
+# ---------------------------------------------------------------- main
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--publish", action="store_true", help="write public README/stats/AUDIT outputs")
+    ap.add_argument("--clone", metavar="OWNER", help="audit fresh clones from github.com/OWNER (needs STATS_TOKEN)")
+    ap.add_argument("--force", action="store_true", help="recompute even if no repo moved")
+    a = ap.parse_args()
+    os.makedirs(STATS, exist_ok=True)
+    checked = now_et()
+    acks = load_json(ACK_FILE, {})
+    prev = load_json(os.path.join(STATS, "stats.json"), {})
+    token = os.environ.get("STATS_TOKEN", "")
+    source = ("GitHub `%s/*` (fresh clone each run)" % a.clone) if a.clone else "local clones on my Mac"
+
+    refs = None
+    if a.clone:
+        refs = remote_refs(a.clone, token)
+        fp_src = hashlib.sha256(json.dumps([refs, script_hash()], sort_keys=True).encode()).hexdigest()[:16]
+        if a.publish and not a.force and None not in refs.values() and prev.get("source_fingerprint") == fp_src:
+            write_status(prev.get("status", "PASS"), checked, prev.get("generated"), source)
+            print("No repo moved since %s; heartbeat refreshed." % prev.get("generated"))
+            return 0
+
+    tmp = None
+    if a.clone:
+        tmp = tempfile.mkdtemp(prefix="stats-")
+        paths = clone_all(a.clone, token, tmp)
+    else:
+        paths = discover_local()
+    missing = [n for n, _ in REPOS if n not in paths]
+    results, monthly, langs = [], collections.Counter(), collections.Counter()
+    try:
+        for name, _ in REPOS:
+            if name not in paths:
+                continue
+            info, priv = analyze(name, paths[name], acks)
+            if not a.clone:
+                write_private_audit(name, paths[name], info, priv)
+            results.append(info)
+            monthly.update(info["monthly_mine"])
+            langs.update({k: v for k, v in info["languages"].items() if k not in NON_CODE})
+            print("%-22s head=%s mine=%d/%d flags=%d reconciled=%s" % (
+                name, info["head"][:7], info["commits_mine"], info["commits_all"], len(info["flags"]), info["reconciled"]))
+    finally:
+        if tmp:
+            shutil.rmtree(tmp, ignore_errors=True)
+
+    status = audit_status(results, missing)
+    tot = {"repos": len(results),
+           "commits_mine": sum(r["commits_mine"] for r in results),
+           "lines_added_mine": sum(r["lines_added_mine"] for r in results),
+           "lines_deleted_mine": sum(r["lines_deleted_mine"] for r in results),
+           "code_lines_head": sum(r["code_lines_head"] for r in results)}
+    print("\nAUDIT %s  totals=%s%s" % (status, json.dumps(tot), ("  missing=" + ",".join(missing)) if missing else ""))
+    for r in results:
+        for f in r["flags"]:
+            print("  flag %-40s %s" % (f["key"], "reviewed" if f["ack"] else "NEEDS REVIEW"))
+
+    if not a.publish:
+        print("Private audit written to stats/_audit/ (not published).")
+        return 0
+    if missing:
+        # never publish partial numbers; keep the last good data, report FAIL on the badge
+        write_status("FAIL", checked, prev.get("generated"), source)
+        print("Not publishing: unreachable repo(s): " + ", ".join(missing))
+        return 2
+
+    data_fp = hashlib.sha256(json.dumps([sorted(r["head"] for r in results), script_hash()]).encode()).hexdigest()[:16]
+    public = {"generated": checked.isoformat(timespec="seconds"), "status": status, "source": source,
+              "data_fingerprint": data_fp,
+              "source_fingerprint": (hashlib.sha256(json.dumps([refs, script_hash()], sort_keys=True).encode()).hexdigest()[:16]
+                                     if refs else None),
+              "totals": tot, "monthly_commits_mine": dict(sorted(monthly.items())),
+              "repos": [{k: v for k, v in r.items() if k != "monthly_mine"} for r in results]}
+    json.dump(public, open(os.path.join(STATS, "stats.json"), "w"), indent=2)
+    top = langs.most_common(7)
+    rest = sum(langs.values()) - sum(v for _, v in top)
+    if rest > 0:
+        top.append(("Other", rest))
+    open(os.path.join(STATS, "languages.svg"), "w").write(
+        bar_svg("Code by language · MAP Lab repos (current HEAD)", top, "%s lines of code" % fmt(sum(langs.values()))))
+    act = activity_svg(dict(monthly))
+    if act:
+        open(os.path.join(STATS, "activity.svg"), "w").write(act)
+    write_audit_md(results, missing, status, checked, data_fp, source)
+    write_readme(results, tot, status, checked)
+    write_status(status, checked, public["generated"], source)
+    print("Published README.md, stats/stats.json, stats/AUDIT.md, stats/*.svg, stats/status.json")
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

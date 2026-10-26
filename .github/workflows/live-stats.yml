@@ -1,0 +1,83 @@
+name: Live stats & audit
+
+# Checks the private MAP Lab repos every 5 minutes (GitHub may delay scheduled
+# runs by a few minutes). If no ref moved, only the live-audit heartbeat is
+# refreshed; otherwise everything is recomputed from fresh clones and published.
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+    inputs:
+      force:
+        description: "Recompute even if no repo moved"
+        type: boolean
+        default: false
+  repository_dispatch:
+    types: [work-repo-push]
+  push:
+    branches: [main]
+    paths:
+      - "scripts/update_stats.py"
+      - "stats/audit_acknowledged.json"
+      - ".github/workflows/live-stats.yml"
+
+concurrency:
+  group: live-stats
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Audit private repos and recompute stats
+        id: audit
+        env:
+          # Fine-grained PAT on zichenzzhao: Contents read-only on the 9 work repos.
+          STATS_TOKEN: ${{ secrets.STATS_TOKEN }}
+        run: |
+          set +e
+          FORCE=""
+          if [ "${{ github.event_name }}" = "push" ] || [ "${{ inputs.force }}" = "true" ]; then FORCE="--force"; fi
+          python scripts/update_stats.py --publish --clone zichenzzhao $FORCE
+          echo "code=$?" >> "$GITHUB_OUTPUT"
+
+      - name: Commit when the data changed
+        if: steps.audit.outputs.code == '0'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add README.md stats/stats.json stats/AUDIT.md stats/activity.svg stats/languages.svg
+          if ! git diff --cached --quiet; then
+            git commit -m "stats: live refresh ($(jq -r .status stats/stats.json))"
+            git pull --rebase --autostash && git push
+          fi
+
+      - name: Prepare heartbeat
+        if: always()
+        run: mkdir -p heartbeat && cp stats/status.json heartbeat/ 2>/dev/null || echo '{"schemaVersion":1,"label":"live audit","message":"error","color":"red"}' > heartbeat/status.json
+
+      - name: Publish heartbeat (live-audit badge)
+        if: always()
+        uses: crazy-max/ghaction-github-pages@v4
+        with:
+          target_branch: audit-status
+          build_dir: heartbeat
+          keep_history: false
+          jekyll: false
+          commit_message: "heartbeat"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Fail the run if the audit failed
+        if: steps.audit.outputs.code != '0'
+        run: exit 1

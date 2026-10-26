@@ -1,13 +1,13 @@
 <p align="center">
-  <img src="https://capsule-render.vercel.app/api?type=waving&height=230&color=0:050816,30:141321,62:03d8f3,85:ff0055,100:fcee0c&text=Zichen%20(Jackson)%20Zhao&fontColor=f9fafb&fontSize=50&fontAlignY=38&desc=EEG%20Pipelines%20%7C%20Research%20Data%20Platforms%20%7C%20Addiction%20Neuroscience&descAlignY=60&descSize=18&animation=fadeIn" alt="Header banner for Zichen (Jackson) Zhao" />
+  <img src="https://capsule-render.vercel.app/api?type=waving&height=230&color=0:050816,30:141321,62:03d8f3,85:ff0055,100:fcee0c&text=Jackson%20Zhao&fontColor=f9fafb&fontSize=50&fontAlignY=38&desc=EEG%20Pipelines%20%7C%20Research%20Data%20Platforms%20%7C%20Addiction%20Neuroscience&descAlignY=60&descSize=18&animation=fadeIn" alt="Header banner for Jackson Zhao" />
 </p>
 
 <h1 align="center">
-  Hi <img src="https://media.giphy.com/media/hvRJCLFzcasrR4ia7z/giphy.gif" width="32" alt="Waving hand" />, I'm Zichen (Jackson) Zhao
+  Hi <img src="https://media.giphy.com/media/hvRJCLFzcasrR4ia7z/giphy.gif" width="32" alt="Waving hand" />, I'm Jackson Zhao
 </h1>
 
 <p align="center">
-  <strong>Research Software Engineer</strong> · <a href="https://labs.icahn.mssm.edu/parvazlab">Motivational and Affective Psychopathology (MAP) Lab</a> · <strong>Icahn School of Medicine at Mount Sinai</strong>
+  <strong>Research Software Engineer</strong> · <a href="https://maplab-web.vercel.app/">Motivational and Affective Psychopathology (MAP) Lab</a> · <strong>Icahn School of Medicine at Mount Sinai</strong>
 </p>
 
 <p align="center">
@@ -16,7 +16,7 @@
 </p>
 
 <p align="center">
-  <a href="https://labs.icahn.mssm.edu/parvazlab" target="_blank">
+  <a href="https://maplab-web.vercel.app/" target="_blank">
     <img src="https://img.shields.io/badge/MAP%20Lab-Mount%20Sinai-03d8f3?style=for-the-badge&logoColor=050816" alt="MAP Lab at Mount Sinai" />
   </a>
   <a href="https://www.linkedin.com/in/jaxonzhao/" target="_blank">
@@ -112,7 +112,7 @@ The MAP Lab, directed by Dr. Muhammad A. Parvaz, studies how emotion and motivat
 ### Infrastructure & Web
 
 **`maplab_web` · Lab website rebuild**
-- From-scratch Next.js 16 + Tailwind v4 rebuild of the lab's WordPress site, with a scroll-driven brain visualization.
+- The lab's website, live at [maplab-web.vercel.app](https://maplab-web.vercel.app/): a from-scratch Next.js 16 + Tailwind v4 rebuild of the original WordPress site, with a scroll-driven brain visualization.
 - Publications enriched from Crossref and PubMed into APA 7 citations, an accessibility pass (heading structure, reduced motion), and Playwright responsive tests plus Lighthouse QA.
 
 **`ReMAP` · Azure deployment handover**

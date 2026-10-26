@@ -1,3 +1,4 @@
 .DS_Store
 **/.DS_Store
 stats/_audit/
+stats/status.json
