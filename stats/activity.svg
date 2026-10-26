@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="880" height="220" viewBox="0 0 880 220" font-family="Segoe UI,Helvetica,Arial,sans-serif">
+<defs><linearGradient id="g" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#03d8f3"/><stop offset="1" stop-color="#ff0055"/></linearGradient></defs>
+<rect x="0.5" y="0.5" width="879" height="219" rx="12" fill="#141321" stroke="#03d8f3" stroke-opacity="0.35"/>
+<text x="28" y="40" fill="#f9fafb" font-size="20" font-weight="600">My commits per month · MAP Lab repos</text>
+<text x="852" y="40" fill="#9ca3af" font-size="14" text-anchor="end">339 commits</text>
+<rect x="65.2" y="128.4" width="80.4" height="51.6" rx="3" fill="url(#g)"><title>2026-04: 36</title></rect>
+<text x="105.4" y="123.4" fill="#e5e7eb" font-size="11" text-anchor="middle">36</text>
+<text x="105.4" y="204" fill="#9ca3af" font-size="11" text-anchor="middle">Apr 26</text>
+<rect x="180.1" y="148.5" width="80.4" height="31.5" rx="3" fill="url(#g)"><title>2026-05: 22</title></rect>
+<text x="220.3" y="143.5" fill="#e5e7eb" font-size="11" text-anchor="middle">22</text>
+<text x="220.3" y="204" fill="#9ca3af" font-size="11" text-anchor="middle">May 26</text>
+<rect x="294.9" y="108.4" width="80.4" height="71.6" rx="3" fill="url(#g)"><title>2026-06: 50</title></rect>
+<text x="335.1" y="103.4" fill="#e5e7eb" font-size="11" text-anchor="middle">50</text>
+<text x="335.1" y="204" fill="#9ca3af" font-size="11" text-anchor="middle">Jun 26</text>
+<rect x="409.8" y="139.9" width="80.4" height="40.1" rx="3" fill="url(#g)"><title>2026-07: 28</title></rect>
+<text x="450.0" y="134.9" fill="#e5e7eb" font-size="11" text-anchor="middle">28</text>
+<text x="450.0" y="204" fill="#9ca3af" font-size="11" text-anchor="middle">Jul 26</text>
+<rect x="524.7" y="91.2" width="80.4" height="88.8" rx="3" fill="url(#g)"><title>2026-08: 62</title></rect>
+<text x="564.9" y="86.2" fill="#e5e7eb" font-size="11" text-anchor="middle">62</text>
+<text x="564.9" y="204" fill="#9ca3af" font-size="11" text-anchor="middle">Aug 26</text>
+<rect x="639.5" y="64.0" width="80.4" height="116.0" rx="3" fill="url(#g)"><title>2026-09: 81</title></rect>
+<text x="679.7" y="59.0" fill="#e5e7eb" font-size="11" text-anchor="middle">81</text>
+<text x="679.7" y="204" fill="#9ca3af" font-size="11" text-anchor="middle">Sep 26</text>
+<rect x="754.4" y="94.1" width="80.4" height="85.9" rx="3" fill="url(#g)"><title>2026-10: 60</title></rect>
+<text x="794.6" y="89.1" fill="#e5e7eb" font-size="11" text-anchor="middle">60</text>
+<text x="794.6" y="204" fill="#9ca3af" font-size="11" text-anchor="middle">Oct 26</text>
+</svg>

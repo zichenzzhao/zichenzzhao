@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="880" height="178" viewBox="0 0 880 178" font-family="Segoe UI,Helvetica,Arial,sans-serif">
+<rect x="0.5" y="0.5" width="879" height="177" rx="12" fill="#141321" stroke="#03d8f3" stroke-opacity="0.35"/>
+<text x="28" y="44" fill="#f9fafb" font-size="20" font-weight="600">Code by language · MAP Lab repos (current HEAD)</text>
+<text x="852" y="44" fill="#9ca3af" font-size="14" text-anchor="end">119,114 lines of code</text>
+<rect x="28.00" y="66" width="520.47" height="14" fill="#3776AB"/>
+<rect x="548.47" y="66" width="184.45" height="14" fill="#3178C6"/>
+<rect x="732.92" y="66" width="61.16" height="14" fill="#03d8f3"/>
+<rect x="794.08" y="66" width="25.81" height="14" fill="#F37626"/>
+<rect x="819.89" y="66" width="13.07" height="14" fill="#F7DF1E"/>
+<rect x="832.97" y="66" width="10.36" height="14" fill="#ff0055"/>
+<rect x="843.33" y="66" width="4.46" height="14" fill="#E34F26"/>
+<rect x="847.79" y="66" width="4.21" height="14" fill="#9ca3af"/>
+<circle cx="33.0" cy="108" r="5" fill="#3776AB"/>
+<text x="44.0" y="112" fill="#e5e7eb" font-size="14">Python <tspan fill="#9ca3af">63.2% · 75,237 lines</tspan></text>
+<circle cx="307.7" cy="108" r="5" fill="#3178C6"/>
+<text x="318.7" y="112" fill="#e5e7eb" font-size="14">TypeScript <tspan fill="#9ca3af">22.4% · 26,664 lines</tspan></text>
+<circle cx="582.3" cy="108" r="5" fill="#03d8f3"/>
+<text x="593.3" y="112" fill="#e5e7eb" font-size="14">SQL <tspan fill="#9ca3af">7.4% · 8,841 lines</tspan></text>
+<circle cx="33.0" cy="130" r="5" fill="#F37626"/>
+<text x="44.0" y="134" fill="#e5e7eb" font-size="14">Jupyter <tspan fill="#9ca3af">3.1% · 3,731 lines</tspan></text>
+<circle cx="307.7" cy="130" r="5" fill="#F7DF1E"/>
+<text x="318.7" y="134" fill="#e5e7eb" font-size="14">JavaScript <tspan fill="#9ca3af">1.6% · 1,890 lines</tspan></text>
+<circle cx="582.3" cy="130" r="5" fill="#ff0055"/>
+<text x="593.3" y="134" fill="#e5e7eb" font-size="14">CSS <tspan fill="#9ca3af">1.3% · 1,498 lines</tspan></text>
+<circle cx="33.0" cy="152" r="5" fill="#E34F26"/>
+<text x="44.0" y="156" fill="#e5e7eb" font-size="14">HTML <tspan fill="#9ca3af">0.5% · 644 lines</tspan></text>
+<circle cx="307.7" cy="152" r="5" fill="#9ca3af"/>
+<text x="318.7" y="156" fill="#e5e7eb" font-size="14">Other <tspan fill="#9ca3af">0.5% · 609 lines</tspan></text>
+</svg>

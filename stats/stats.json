@@ -1,0 +1,220 @@
+{
+  "generated": "2026-10-26",
+  "totals": {
+    "repos": 9,
+    "commits_mine": 339,
+    "lines_added_mine": 170746,
+    "lines_deleted_mine": 43794,
+    "code_lines_head": 119114,
+    "first_commit": "2026-04-02",
+    "last_commit": "2026-10-26"
+  },
+  "repos": [
+    {
+      "repo": "MAPLAB_MNE",
+      "area": "EEG pipeline",
+      "commits_mine": 136,
+      "lines_added_mine": 56852,
+      "lines_deleted_mine": 14993,
+      "code_lines_head": 36779,
+      "code_files_head": 133,
+      "test_files": 46,
+      "sql_migrations": 0,
+      "first_commit": "2026-04-02",
+      "last_commit": "2026-10-22",
+      "languages": {
+        "Python": 36509,
+        "YAML": 3230,
+        "Markdown": 883,
+        "Shell": 270
+      },
+      "tags": [
+        "phase2-preintegration",
+        "phase2-closed-3a32629e",
+        "phase3-complete",
+        "phase5-complete",
+        "stage-a-gates-honest",
+        "golden-v2-frozen"
+      ]
+    },
+    {
+      "repo": "Synthetic_EEG_Cocaine",
+      "area": "Synthetic EEG",
+      "commits_mine": 35,
+      "lines_added_mine": 0,
+      "lines_deleted_mine": 0,
+      "code_lines_head": 3731,
+      "code_files_head": 5,
+      "test_files": 0,
+      "sql_migrations": 0,
+      "first_commit": "2026-04-02",
+      "last_commit": "2026-04-13",
+      "languages": {
+        "Jupyter": 3731,
+        "Markdown": 400,
+        "YAML": 64
+      },
+      "tags": []
+    },
+    {
+      "repo": "MAPLAB_Database",
+      "area": "Data platform",
+      "commits_mine": 76,
+      "lines_added_mine": 82772,
+      "lines_deleted_mine": 24350,
+      "code_lines_head": 54513,
+      "code_files_head": 147,
+      "test_files": 14,
+      "sql_migrations": 0,
+      "first_commit": "2026-06-10",
+      "last_commit": "2026-10-26",
+      "languages": {
+        "Python": 29843,
+        "TypeScript": 15498,
+        "SQL": 8841,
+        "Markdown": 6017,
+        "YAML": 206,
+        "JavaScript": 153,
+        "Shell": 128,
+        "CSS": 50
+      },
+      "tags": []
+    },
+    {
+      "repo": "engineerhub",
+      "area": "MAPLAB Hub",
+      "commits_mine": 19,
+      "lines_added_mine": 13242,
+      "lines_deleted_mine": 180,
+      "code_lines_head": 11894,
+      "code_files_head": 80,
+      "test_files": 14,
+      "sql_migrations": 0,
+      "first_commit": "2026-09-08",
+      "last_commit": "2026-10-06",
+      "languages": {
+        "TypeScript": 6394,
+        "Python": 3164,
+        "CSS": 962,
+        "Markdown": 766,
+        "JavaScript": 729,
+        "HTML": 576,
+        "YAML": 137,
+        "Shell": 69,
+        "Config": 36
+      },
+      "tags": []
+    },
+    {
+      "repo": "redcap-config",
+      "area": "REDCap config",
+      "commits_mine": 3,
+      "lines_added_mine": 464,
+      "lines_deleted_mine": 0,
+      "code_lines_head": 398,
+      "code_files_head": 7,
+      "test_files": 0,
+      "sql_migrations": 0,
+      "first_commit": "2026-09-14",
+      "last_commit": "2026-10-22",
+      "languages": {
+        "Python": 330,
+        "Markdown": 294,
+        "HTML": 68,
+        "YAML": 64
+      },
+      "tags": []
+    },
+    {
+      "repo": "abcd-engine",
+      "area": "ABCD / ML",
+      "commits_mine": 2,
+      "lines_added_mine": 6100,
+      "lines_deleted_mine": 0,
+      "code_lines_head": 5327,
+      "code_files_head": 28,
+      "test_files": 5,
+      "sql_migrations": 0,
+      "first_commit": "2026-08-03",
+      "last_commit": "2026-09-16",
+      "languages": {
+        "Python": 5327,
+        "YAML": 647,
+        "Markdown": 346,
+        "Config": 2
+      },
+      "tags": []
+    },
+    {
+      "repo": "aible_ABCD",
+      "area": "ABCD / ML",
+      "commits_mine": 4,
+      "lines_added_mine": 79,
+      "lines_deleted_mine": 0,
+      "code_lines_head": 64,
+      "code_files_head": 1,
+      "test_files": 0,
+      "sql_migrations": 0,
+      "first_commit": "2026-05-27",
+      "last_commit": "2026-06-01",
+      "languages": {
+        "YAML": 64,
+        "Python": 64,
+        "Markdown": 1
+      },
+      "tags": []
+    },
+    {
+      "repo": "ReMAP",
+      "area": "Cloud app",
+      "commits_mine": 5,
+      "lines_added_mine": 163,
+      "lines_deleted_mine": 0,
+      "code_lines_head": 142,
+      "code_files_head": 1,
+      "test_files": 0,
+      "sql_migrations": 0,
+      "first_commit": "2026-05-12",
+      "last_commit": "2026-05-12",
+      "languages": {
+        "Markdown": 251,
+        "Shell": 142,
+        "YAML": 64
+      },
+      "tags": [
+        "v0.0.0-handover"
+      ]
+    },
+    {
+      "repo": "maplab_web",
+      "area": "Lab website",
+      "commits_mine": 59,
+      "lines_added_mine": 11074,
+      "lines_deleted_mine": 4271,
+      "code_lines_head": 6266,
+      "code_files_head": 57,
+      "test_files": 1,
+      "sql_migrations": 0,
+      "first_commit": "2026-06-16",
+      "last_commit": "2026-10-23",
+      "languages": {
+        "TypeScript": 4772,
+        "Markdown": 1825,
+        "JavaScript": 1008,
+        "CSS": 486,
+        "YAML": 64
+      },
+      "tags": []
+    }
+  ],
+  "monthly_commits_mine": {
+    "2026-04": 36,
+    "2026-05": 22,
+    "2026-06": 50,
+    "2026-07": 28,
+    "2026-08": 62,
+    "2026-09": 81,
+    "2026-10": 60
+  },
+  "missing": []
+}
