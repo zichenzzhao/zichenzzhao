@@ -1,6 +1,6 @@
 # Live audit ledger
 
-**Status: WARN** · data as of 2026-10-27 08:43 ET · [run log](https://github.com/zichenzzhao/zichenzzhao/actions/runs/40506013585)
+**Status: WARN** · data as of 2026-10-27 14:17 ET · [run log](https://github.com/zichenzzhao/zichenzzhao/actions/runs/40558515025)
 
 Source: GitHub `zichenzzhao/*` (fresh clone each run). Every number on the profile is recomputed from these exact commits by [`scripts/update_stats.py`](../scripts/update_stats.py). Repos are private; this ledger publishes counts and commit SHAs only.
 
@@ -13,7 +13,7 @@ Source: GitHub `zichenzzhao/*` (fresh clone each run). Every number on the profi
 | `engineerhub` | `fc27677` | 2026-10-26 | 22 | 19 | 0 | 3 | 0 |
 | `MAPLAB_Database` | `2c2afaf` | 2026-10-26 | 79 | 76 | 0 | 3 | 6 |
 | `MAPLAB_MNE` | `802da35` | 2026-10-26 | 139 | 136 | 0 | 3 | 3 |
-| `maplab_web` | `977b421` | 2026-10-26 | 62 | 59 | 0 | 3 | 0 |
+| `maplab_web` | `c352e39` | 2026-10-27 | 64 | 61 | 0 | 3 | 0 |
 | `redcap-config` | `659b4eb` | 2026-10-26 | 6 | 3 | 0 | 3 | 0 |
 | `ReMAP` | `00bae6b` | 2026-10-26 | 8 | 5 | 0 | 3 | 0 |
 | `Synthetic_EEG_Cocaine` | `6401570` | 2026-10-26 | 38 | 35 | 0 | 3 | 0 |
@@ -29,7 +29,7 @@ Only the first column is shown on the profile. A row reconciles when the buckets
 | `engineerhub` | 27,569 | 13,242 | 1,094 | 0 | 4,026 | 8,824 | 0 | 0 | 383 | ✅ |
 | `MAPLAB_Database` | 116,506 | 82,772 | 8,431 | 0 | 6,346 | 17,091 | 234 | 0 | 1,632 | ✅ |
 | `MAPLAB_MNE` | 7,940,826 | 56,852 | 10,829 | 5,842 | 315,208 | 6,666,606 | 0 | 884,823 | 666 | ✅ |
-| `maplab_web` | 68,861 | 11,074 | 2,117 | 0 | 7,778 | 43,275 | 48 | 0 | 4,569 | ✅ |
+| `maplab_web` | 69,305 | 11,302 | 2,117 | 0 | 7,778 | 43,490 | 48 | 0 | 4,570 | ✅ |
 | `redcap-config` | 898 | 464 | 409 | 0 | 0 | 0 | 0 | 0 | 25 | ✅ |
 | `ReMAP` | 2,305 | 309 | 350 | 0 | 0 | 0 | 0 | 1,410 | 236 | ✅ |
 | `Synthetic_EEG_Cocaine` | 1,132,330 | 0 | 546 | 84,555 | 5,002 | 1,039,699 | 0 | 0 | 2,528 | ✅ |
@@ -46,4 +46,4 @@ Only the first column is shown on the profile. A row reconciles when the buckets
 - **Flags**: any single commit over 10,000 counted lines or any file over 3,000 lines is flagged until reviewed.
 - **Status**: PASS = everything reconciles and every flag is reviewed. WARN = unreviewed flags. FAIL = a repo was unreachable or a ledger does not reconcile.
 
-Fingerprint: `f7b0d70148e3a90b`
+Fingerprint: `ecc10eb1937c6c64`
