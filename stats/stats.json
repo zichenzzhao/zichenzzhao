@@ -1,15 +1,15 @@
 {
-  "generated": "2026-10-28T09:52:48-04:00",
+  "generated": "2026-10-28T15:09:29-04:00",
   "status": "WARN",
   "source": "GitHub `zichenzzhao/*` (fresh clone each run)",
-  "data_fingerprint": "71c382a29fe7b017",
+  "data_fingerprint": "067d13be93fd797a",
   "source_fingerprint": "56c9eaba3187c653",
   "totals": {
     "repos": 9,
-    "commits_mine": 344,
-    "lines_added_mine": 171311,
-    "lines_deleted_mine": 44021,
-    "code_lines_head": 119399
+    "commits_mine": 349,
+    "lines_added_mine": 173026,
+    "lines_deleted_mine": 50693,
+    "code_lines_head": 115139
   },
   "monthly_commits_mine": {
     "2026-04": 36,
@@ -18,44 +18,44 @@
     "2026-07": 28,
     "2026-08": 62,
     "2026-09": 81,
-    "2026-10": 65
+    "2026-10": 70
   },
   "repos": [
     {
       "repo": "abcd-engine",
-      "head": "cf2ec8b73ec3",
-      "head_date": "2026-10-26",
-      "commits_all": 5,
-      "commits_mine": 2,
+      "head": "e55278c35194",
+      "head_date": "2026-10-28",
+      "commits_all": 10,
+      "commits_mine": 7,
       "commits_others": 0,
       "commits_mirror": 3,
       "commits_merge": 0,
-      "lines_added_mine": 6100,
-      "lines_deleted_mine": 0,
+      "lines_added_mine": 7815,
+      "lines_deleted_mine": 6672,
       "ledger_added": {
-        "code": 6100,
-        "docs_config": 1093,
+        "code": 7815,
+        "docs_config": 1669,
         "notebook": 0,
-        "data_or_binary": 70,
+        "data_or_binary": 378,
         "excluded_dir": 13019,
         "generated": 0,
         "vendored": 405,
-        "other": 18
+        "other": 51
       },
-      "ledger_raw_added": 20705,
+      "ledger_raw_added": 23337,
       "binary_file_changes": 0,
-      "active_days": 2,
+      "active_days": 3,
       "first_commit": "2026-08-03",
-      "last_commit": "2026-09-16",
-      "code_lines_head": 5327,
-      "code_files_head": 28,
-      "test_files": 5,
+      "last_commit": "2026-10-28",
+      "code_lines_head": 1067,
+      "code_files_head": 20,
+      "test_files": 1,
       "notebook_only": false,
       "languages": {
-        "Python": 5327,
-        "YAML": 647,
-        "Markdown": 346,
-        "Config": 2
+        "Python": 1067,
+        "YAML": 228,
+        "Markdown": 122,
+        "Config": 19
       },
       "generated_files_excluded": 0,
       "tags": [],

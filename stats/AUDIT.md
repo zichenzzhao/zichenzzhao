@@ -1,6 +1,6 @@
 # Live audit ledger
 
-**Status: WARN** · data as of 2026-10-28 09:52 ET · [run log](https://github.com/zichenzzhao/zichenzzhao/actions/runs/40700489883)
+**Status: WARN** · data as of 2026-10-28 15:09 ET · [run log](https://github.com/zichenzzhao/zichenzzhao/actions/runs/40751728472)
 
 Source: GitHub `zichenzzhao/*` (fresh clone each run). Every number on the profile is recomputed from these exact commits by [`scripts/update_stats.py`](../scripts/update_stats.py). Repos are private; this ledger publishes counts and commit SHAs only.
 
@@ -8,7 +8,7 @@ Source: GitHub `zichenzzhao/*` (fresh clone each run). Every number on the profi
 
 | Repo | Commit audited | Committed | All commits | Mine (counted) | Others' (excluded) | Mirror sync (excluded) | Merges (excluded) |
 |---|---|---|--:|--:|--:|--:|--:|
-| `abcd-engine` | `cf2ec8b` | 2026-10-26 | 5 | 2 | 0 | 3 | 0 |
+| `abcd-engine` | `e55278c` | 2026-10-28 | 10 | 7 | 0 | 3 | 0 |
 | `aible_ABCD` | `2f9d647` | 2026-10-26 | 7 | 4 | 0 | 3 | 0 |
 | `engineerhub` | `fc27677` | 2026-10-26 | 22 | 19 | 0 | 3 | 0 |
 | `MAPLAB_Database` | `2c2afaf` | 2026-10-26 | 79 | 76 | 0 | 3 | 6 |
@@ -24,7 +24,7 @@ Only the first column is shown on the profile. A row reconciles when the buckets
 
 | Repo | Raw lines added | Counted as code | Docs / config | Notebooks | Data / binary / lockfiles | Outputs / backups / assets | Generated | Colleague / vendored | Other file types | Reconciles |
 |---|--:|--:|--:|--:|--:|--:|--:|--:|--:|:-:|
-| `abcd-engine` | 20,705 | 6,100 | 1,093 | 0 | 70 | 13,019 | 0 | 405 | 18 | ✅ |
+| `abcd-engine` | 23,337 | 7,815 | 1,669 | 0 | 378 | 13,019 | 0 | 405 | 51 | ✅ |
 | `aible_ABCD` | 89 | 79 | 1 | 0 | 3 | 3 | 0 | 0 | 3 | ✅ |
 | `engineerhub` | 27,569 | 13,242 | 1,094 | 0 | 4,026 | 8,824 | 0 | 0 | 383 | ✅ |
 | `MAPLAB_Database` | 116,506 | 82,772 | 8,431 | 0 | 6,346 | 17,091 | 234 | 0 | 1,632 | ✅ |
@@ -46,4 +46,4 @@ Only the first column is shown on the profile. A row reconciles when the buckets
 - **Flags**: any single commit over 10,000 counted lines or any file over 3,000 lines is flagged until reviewed.
 - **Status**: PASS = everything reconciles and every flag is reviewed. WARN = unreviewed flags. FAIL = a repo was unreachable or a ledger does not reconcile.
 
-Fingerprint: `71c382a29fe7b017`
+Fingerprint: `067d13be93fd797a`
