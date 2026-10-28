@@ -68,7 +68,7 @@ The MAP Lab, directed by Dr. Muhammad A. Parvaz, studies how emotion and motivat
 | `redcap-config` | REDCap config | 3 | +464 / −0 | 398 | 2026-09 → 2026-10 |
 | `abcd-engine` | ABCD / ML | 2 | +6,100 / −0 | 5,327 | 2026-08 → 2026-09 |
 
-<sub><b>Live:</b> recomputed from the private GitHub repos within minutes of every push · data as of 2026-10-28 03:00 ET · <a href="./stats/AUDIT.md">audit ledger</a> (every commit audited, where every line went, flags) · method: <a href="./scripts/update_stats.py"><code>update_stats.py</code></a>. Counts are my non-merge commits; lines are source code I wrote, with docs, data, outputs, backups, generated files and colleagues' code excluded. ¹ Notebook repos count code-cell lines at HEAD only.</sub>
+<sub><b>Live:</b> recomputed from the private GitHub repos within minutes of every push · data as of 2026-10-28 09:52 ET · <a href="./stats/AUDIT.md">audit ledger</a> (every commit audited, where every line went, flags) · method: <a href="./scripts/update_stats.py"><code>update_stats.py</code></a>. Counts are my non-merge commits; lines are source code I wrote, with docs, data, outputs, backups, generated files and colleagues' code excluded. ¹ Notebook repos count code-cell lines at HEAD only.</sub>
 <!-- STATS:END -->
 
 ## Systems I Build at MAP Lab 🛠️
