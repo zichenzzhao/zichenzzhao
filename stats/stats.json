@@ -1,15 +1,15 @@
 {
-  "generated": "2026-11-02T05:00:02-05:00",
+  "generated": "2026-11-02T14:59:40-05:00",
   "status": "WARN",
   "source": "GitHub `zichenzzhao/*` (fresh clone each run)",
-  "data_fingerprint": "067d13be93fd797a",
+  "data_fingerprint": "932c8c7c92e57d92",
   "source_fingerprint": "56c9eaba3187c653",
   "totals": {
     "repos": 9,
-    "commits_mine": 349,
-    "lines_added_mine": 173026,
-    "lines_deleted_mine": 50693,
-    "code_lines_head": 115139
+    "commits_mine": 353,
+    "lines_added_mine": 198861,
+    "lines_deleted_mine": 50708,
+    "code_lines_head": 138088
   },
   "monthly_commits_mine": {
     "2026-04": 36,
@@ -18,7 +18,8 @@
     "2026-07": 28,
     "2026-08": 62,
     "2026-09": 81,
-    "2026-10": 70
+    "2026-10": 70,
+    "2026-11": 4
   },
   "repos": [
     {
@@ -210,41 +211,41 @@
     },
     {
       "repo": "MAPLAB_MNE",
-      "head": "802da350b532",
-      "head_date": "2026-10-26",
-      "commits_all": 139,
-      "commits_mine": 136,
+      "head": "edf359ead2bc",
+      "head_date": "2026-11-02",
+      "commits_all": 143,
+      "commits_mine": 140,
       "commits_others": 0,
       "commits_mirror": 3,
       "commits_merge": 3,
-      "lines_added_mine": 56852,
-      "lines_deleted_mine": 14993,
+      "lines_added_mine": 82687,
+      "lines_deleted_mine": 15008,
       "ledger_added": {
-        "code": 56852,
-        "docs_config": 10829,
+        "code": 82687,
+        "docs_config": 11641,
         "notebook": 5842,
-        "data_or_binary": 315208,
-        "excluded_dir": 6666606,
-        "generated": 0,
+        "data_or_binary": 315213,
+        "excluded_dir": 6666607,
+        "generated": 3356,
         "vendored": 884823,
-        "other": 666
+        "other": 730
       },
-      "ledger_raw_added": 7940826,
+      "ledger_raw_added": 7970899,
       "binary_file_changes": 3643,
-      "active_days": 40,
+      "active_days": 41,
       "first_commit": "2026-04-02",
-      "last_commit": "2026-10-22",
-      "code_lines_head": 36779,
-      "code_files_head": 133,
+      "last_commit": "2026-11-02",
+      "code_lines_head": 59728,
+      "code_files_head": 253,
       "test_files": 46,
       "notebook_only": false,
       "languages": {
-        "Python": 36509,
-        "YAML": 3230,
-        "Markdown": 883,
-        "Shell": 270
+        "Python": 59442,
+        "YAML": 3258,
+        "Markdown": 1507,
+        "Shell": 286
       },
-      "generated_files_excluded": 0,
+      "generated_files_excluded": 7,
       "tags": [
         "phase2-preintegration",
         "phase2-closed-3a32629e",
@@ -253,7 +254,15 @@
         "stage-a-gates-honest",
         "golden-v2-frozen"
       ],
-      "flags": [],
+      "flags": [
+        {
+          "key": "MAPLAB_MNE@599c31e",
+          "kind": "large_commit",
+          "date": "2026-11-02",
+          "lines": 23513,
+          "ack": null
+        }
+      ],
       "reconciled": true
     },
     {
