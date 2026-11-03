@@ -1,17 +1,17 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="880" height="178" viewBox="0 0 880 178" font-family="Segoe UI,Helvetica,Arial,sans-serif">
 <rect x="0.5" y="0.5" width="879" height="177" rx="12" fill="#141321" stroke="#03d8f3" stroke-opacity="0.35"/>
 <text x="28" y="44" fill="#f9fafb" font-size="20" font-weight="600">Code by language · MAP Lab repos (current HEAD)</text>
-<text x="852" y="44" fill="#9ca3af" font-size="14" text-anchor="end">138,088 lines of code</text>
-<rect x="28.00" y="66" width="560.38" height="14" fill="#3776AB"/>
-<rect x="588.38" y="66" width="160.12" height="14" fill="#3178C6"/>
-<rect x="748.50" y="66" width="52.76" height="14" fill="#03d8f3"/>
-<rect x="801.25" y="66" width="22.26" height="14" fill="#F37626"/>
-<rect x="823.52" y="66" width="11.28" height="14" fill="#F7DF1E"/>
-<rect x="834.80" y="66" width="9.01" height="14" fill="#ff0055"/>
-<rect x="843.81" y="66" width="4.35" height="14" fill="#00ffc8"/>
-<rect x="848.16" y="66" width="3.84" height="14" fill="#9ca3af"/>
+<text x="852" y="44" fill="#9ca3af" font-size="14" text-anchor="end">138,467 lines of code</text>
+<rect x="28.00" y="66" width="561.10" height="14" fill="#3776AB"/>
+<rect x="589.10" y="66" width="159.68" height="14" fill="#3178C6"/>
+<rect x="748.78" y="66" width="52.61" height="14" fill="#03d8f3"/>
+<rect x="801.39" y="66" width="22.20" height="14" fill="#F37626"/>
+<rect x="823.60" y="66" width="11.25" height="14" fill="#F7DF1E"/>
+<rect x="834.84" y="66" width="8.99" height="14" fill="#ff0055"/>
+<rect x="843.83" y="66" width="4.34" height="14" fill="#00ffc8"/>
+<rect x="848.17" y="66" width="3.83" height="14" fill="#9ca3af"/>
 <circle cx="33.0" cy="108" r="5" fill="#3776AB"/>
-<text x="44.0" y="112" fill="#e5e7eb" font-size="14">Python <tspan fill="#9ca3af">68.0% · 93,910 lines</tspan></text>
+<text x="44.0" y="112" fill="#e5e7eb" font-size="14">Python <tspan fill="#9ca3af">68.1% · 94,289 lines</tspan></text>
 <circle cx="307.7" cy="108" r="5" fill="#3178C6"/>
 <text x="318.7" y="112" fill="#e5e7eb" font-size="14">TypeScript <tspan fill="#9ca3af">19.4% · 26,833 lines</tspan></text>
 <circle cx="582.3" cy="108" r="5" fill="#03d8f3"/>
