@@ -1,15 +1,15 @@
 {
-  "generated": "2026-11-09T14:24:44-05:00",
+  "generated": "2026-11-09T21:18:15-05:00",
   "status": "WARN",
   "source": "GitHub `zichenzzhao/*` (fresh clone each run)",
-  "data_fingerprint": "77e038c2ab224764",
+  "data_fingerprint": "9ea6f26f8be61da6",
   "source_fingerprint": "56c9eaba3187c653",
   "totals": {
     "repos": 9,
-    "commits_mine": 358,
-    "lines_added_mine": 202729,
-    "lines_deleted_mine": 51799,
-    "code_lines_head": 140612
+    "commits_mine": 359,
+    "lines_added_mine": 203209,
+    "lines_deleted_mine": 51825,
+    "code_lines_head": 141028
   },
   "monthly_commits_mine": {
     "2026-04": 36,
@@ -19,7 +19,7 @@
     "2026-08": 62,
     "2026-09": 81,
     "2026-10": 70,
-    "2026-11": 9
+    "2026-11": 10
   },
   "repos": [
     {
@@ -211,17 +211,17 @@
     },
     {
       "repo": "MAPLAB_MNE",
-      "head": "25551e4a0f3d",
+      "head": "9b0403c1a24a",
       "head_date": "2026-11-09",
-      "commits_all": 148,
-      "commits_mine": 145,
+      "commits_all": 149,
+      "commits_mine": 146,
       "commits_others": 0,
       "commits_mirror": 3,
       "commits_merge": 3,
-      "lines_added_mine": 86555,
-      "lines_deleted_mine": 16099,
+      "lines_added_mine": 87035,
+      "lines_deleted_mine": 16125,
       "ledger_added": {
-        "code": 86555,
+        "code": 87035,
         "docs_config": 11935,
         "notebook": 5842,
         "data_or_binary": 315213,
@@ -230,17 +230,17 @@
         "vendored": 884823,
         "other": 730
       },
-      "ledger_raw_added": 7975295,
+      "ledger_raw_added": 7975775,
       "binary_file_changes": 3643,
       "active_days": 43,
       "first_commit": "2026-04-02",
       "last_commit": "2026-11-09",
-      "code_lines_head": 62252,
-      "code_files_head": 265,
+      "code_lines_head": 62668,
+      "code_files_head": 266,
       "test_files": 46,
       "notebook_only": false,
       "languages": {
-        "Python": 61966,
+        "Python": 62382,
         "YAML": 3258,
         "Markdown": 1718,
         "Shell": 286
