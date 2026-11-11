@@ -1,6 +1,6 @@
 # Live audit ledger
 
-**Status: WARN** · data as of 2026-11-11 11:59 ET · [run log](https://github.com/zichenzzhao/zichenzzhao/actions/runs/43063636058)
+**Status: WARN** · data as of 2026-11-11 18:16 ET · [run log](https://github.com/zichenzzhao/zichenzzhao/actions/runs/43118576643)
 
 Source: GitHub `zichenzzhao/*` (fresh clone each run). Every number on the profile is recomputed from these exact commits by [`scripts/update_stats.py`](../scripts/update_stats.py). Repos are private; this ledger publishes counts and commit SHAs only.
 
@@ -11,8 +11,8 @@ Source: GitHub `zichenzzhao/*` (fresh clone each run). Every number on the profi
 | `abcd-engine` | `e55278c` | 2026-10-28 | 10 | 7 | 0 | 3 | 0 |
 | `aible_ABCD` | `2f9d647` | 2026-10-26 | 7 | 4 | 0 | 3 | 0 |
 | `engineerhub` | `fc27677` | 2026-10-26 | 22 | 19 | 0 | 3 | 0 |
-| `MAPLAB_Database` | `67ee6ca` | 2026-11-10 | 82 | 79 | 0 | 3 | 6 |
-| `MAPLAB_MNE` | `df94a53` | 2026-11-10 | 151 | 148 | 0 | 3 | 3 |
+| `MAPLAB_Database` | `e4b8357` | 2026-11-11 | 89 | 86 | 0 | 3 | 7 |
+| `MAPLAB_MNE` | `ff84216` | 2026-11-11 | 152 | 149 | 0 | 3 | 3 |
 | `maplab_web` | `82891fc` | 2026-10-27 | 67 | 64 | 0 | 3 | 0 |
 | `redcap-config` | `659b4eb` | 2026-10-26 | 6 | 3 | 0 | 3 | 0 |
 | `ReMAP` | `00bae6b` | 2026-10-26 | 8 | 5 | 0 | 3 | 0 |
@@ -27,8 +27,8 @@ Only the first column is shown on the profile. A row reconciles when the buckets
 | `abcd-engine` | 23,337 | 7,815 | 1,669 | 0 | 378 | 13,019 | 0 | 405 | 51 | ✅ |
 | `aible_ABCD` | 89 | 79 | 1 | 0 | 3 | 3 | 0 | 0 | 3 | ✅ |
 | `engineerhub` | 27,569 | 13,242 | 1,094 | 0 | 4,026 | 8,824 | 0 | 0 | 383 | ✅ |
-| `MAPLAB_Database` | 118,445 | 84,704 | 8,431 | 0 | 6,346 | 17,091 | 234 | 0 | 1,639 | ✅ |
-| `MAPLAB_MNE` | 7,976,795 | 88,033 | 11,957 | 5,842 | 315,213 | 6,666,607 | 3,590 | 884,823 | 730 | ✅ |
+| `MAPLAB_Database` | 120,603 | 86,659 | 8,868 | 0 | 6,346 | 17,091 | 0 | 0 | 1,639 | ✅ |
+| `MAPLAB_MNE` | 7,976,977 | 88,204 | 11,957 | 5,842 | 315,213 | 6,666,607 | 3,590 | 884,834 | 730 | ✅ |
 | `maplab_web` | 70,726 | 11,493 | 2,117 | 0 | 7,778 | 44,720 | 48 | 0 | 4,570 | ✅ |
 | `redcap-config` | 898 | 464 | 409 | 0 | 0 | 0 | 0 | 0 | 25 | ✅ |
 | `ReMAP` | 2,305 | 309 | 350 | 0 | 0 | 0 | 0 | 1,410 | 236 | ✅ |
@@ -47,4 +47,4 @@ Only the first column is shown on the profile. A row reconciles when the buckets
 - **Flags**: any single commit over 10,000 counted lines or any file over 3,000 lines is flagged until reviewed.
 - **Status**: PASS = everything reconciles and every flag is reviewed. WARN = unreviewed flags. FAIL = a repo was unreachable or a ledger does not reconcile.
 
-Fingerprint: `0407509ddc00a110`
+Fingerprint: `75156fa03e292b92`
