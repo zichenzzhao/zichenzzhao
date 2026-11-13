@@ -1,27 +1,27 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="880" height="178" viewBox="0 0 880 178" font-family="Segoe UI,Helvetica,Arial,sans-serif">
 <rect x="0.5" y="0.5" width="879" height="177" rx="12" fill="#141321" stroke="#03d8f3" stroke-opacity="0.35"/>
 <text x="28" y="44" fill="#f9fafb" font-size="20" font-weight="600">Code by language · MAP Lab repos (current HEAD)</text>
-<text x="852" y="44" fill="#9ca3af" font-size="14" text-anchor="end">126,802 lines of code</text>
-<rect x="28.00" y="66" width="530.48" height="14" fill="#3776AB"/>
-<rect x="558.48" y="66" width="180.41" height="14" fill="#3178C6"/>
-<rect x="738.89" y="66" width="57.45" height="14" fill="#03d8f3"/>
-<rect x="796.34" y="66" width="24.25" height="14" fill="#F37626"/>
-<rect x="820.59" y="66" width="12.28" height="14" fill="#F7DF1E"/>
-<rect x="832.87" y="66" width="10.21" height="14" fill="#ff0055"/>
-<rect x="843.08" y="66" width="4.74" height="14" fill="#00ffc8"/>
-<rect x="847.82" y="66" width="4.18" height="14" fill="#9ca3af"/>
+<text x="852" y="44" fill="#9ca3af" font-size="14" text-anchor="end">127,746 lines of code</text>
+<rect x="28.00" y="66" width="526.56" height="14" fill="#3776AB"/>
+<rect x="554.56" y="66" width="185.15" height="14" fill="#3178C6"/>
+<rect x="739.71" y="66" width="57.03" height="14" fill="#03d8f3"/>
+<rect x="796.74" y="66" width="24.07" height="14" fill="#F37626"/>
+<rect x="820.81" y="66" width="12.19" height="14" fill="#F7DF1E"/>
+<rect x="833.00" y="66" width="10.15" height="14" fill="#ff0055"/>
+<rect x="843.14" y="66" width="4.70" height="14" fill="#00ffc8"/>
+<rect x="847.85" y="66" width="4.15" height="14" fill="#9ca3af"/>
 <circle cx="33.0" cy="108" r="5" fill="#3776AB"/>
-<text x="44.0" y="112" fill="#e5e7eb" font-size="14">Python <tspan fill="#9ca3af">64.4% · 81,634 lines</tspan></text>
+<text x="44.0" y="112" fill="#e5e7eb" font-size="14">Python <tspan fill="#9ca3af">63.9% · 81,634 lines</tspan></text>
 <circle cx="307.7" cy="108" r="5" fill="#3178C6"/>
-<text x="318.7" y="112" fill="#e5e7eb" font-size="14">TypeScript <tspan fill="#9ca3af">21.9% · 27,762 lines</tspan></text>
+<text x="318.7" y="112" fill="#e5e7eb" font-size="14">TypeScript <tspan fill="#9ca3af">22.5% · 28,704 lines</tspan></text>
 <circle cx="582.3" cy="108" r="5" fill="#03d8f3"/>
-<text x="593.3" y="112" fill="#e5e7eb" font-size="14">SQL <tspan fill="#9ca3af">7.0% · 8,841 lines</tspan></text>
+<text x="593.3" y="112" fill="#e5e7eb" font-size="14">SQL <tspan fill="#9ca3af">6.9% · 8,841 lines</tspan></text>
 <circle cx="33.0" cy="130" r="5" fill="#F37626"/>
 <text x="44.0" y="134" fill="#e5e7eb" font-size="14">Jupyter <tspan fill="#9ca3af">2.9% · 3,731 lines</tspan></text>
 <circle cx="307.7" cy="130" r="5" fill="#F7DF1E"/>
 <text x="318.7" y="134" fill="#e5e7eb" font-size="14">JavaScript <tspan fill="#9ca3af">1.5% · 1,890 lines</tspan></text>
 <circle cx="582.3" cy="130" r="5" fill="#ff0055"/>
-<text x="593.3" y="134" fill="#e5e7eb" font-size="14">CSS <tspan fill="#9ca3af">1.2% · 1,571 lines</tspan></text>
+<text x="593.3" y="134" fill="#e5e7eb" font-size="14">CSS <tspan fill="#9ca3af">1.2% · 1,573 lines</tspan></text>
 <circle cx="33.0" cy="152" r="5" fill="#00ffc8"/>
 <text x="44.0" y="156" fill="#e5e7eb" font-size="14">Shell <tspan fill="#9ca3af">0.6% · 729 lines</tspan></text>
 <circle cx="307.7" cy="152" r="5" fill="#9ca3af"/>
